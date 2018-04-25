@@ -59,7 +59,7 @@ function login(casper, loginOpts) {
                 this.capture("login-error.png");
                 this.debugHTML();
                 this.die("Login stage 2 timeout. Screenshot saved to login-error.png.", 2);
-            }, 10000);
+            }, 20000);
         }
     });
 
@@ -77,7 +77,7 @@ function login(casper, loginOpts) {
             this.echo("Card Number: " + config.cardNumber);
             // this.echo("Memorable Info: " + config.memInfo);
             this.die("Login timeout. Check credentials. Screenshot saved to login-error.png.", 2);
-        }, 10002);
+        }, 20002);
     });
 }
 
