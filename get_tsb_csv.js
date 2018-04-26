@@ -25,8 +25,13 @@ var allTransactions = [];
 function praseHMTLtoCSV() {
     casper.echo("Prase HML to CSV", "INFO")
 
-    casper.thenClick('a#lstAccLst\\:0\\:lkImageCommercial', function waitForFirst() {    // click into the account we want statement page (HSNOTTS only has one so just click the generic link)
-        casper.waitForSelector('a#pnlgrpStatement\\:conS1\\:lkoverlay', scrapeLoop);
+    casper.thenClick('a[ng-click="goToStatements(data)"]', function waitForFirst() {    // click into the account we want statement page (HSNOTTS only has one so just click the generic link)
+        casper.waitForSelector('#statementComponentsId', scrapeLoop /*, 
+            function gotoStatmentTimeout() {
+                this.capture("statement-error.png");
+                this.debugHTML();
+                this.die("Go to statement timeout. Screenshot saved to statement-error.png.", 2);
+            }, 20000 */);
     });
 }
 
@@ -43,9 +48,15 @@ function scrapeLoop() {
     }
     // click previous page button
     // casper.echo("Loading previous transaction page", "INFO");
-    casper.thenClick('input#pnlgrpStatement\\:conS1\\:frmVSPUpper\\:btnViewPreviousStatement', function waitForPrevious() {
+    casper.thenClick('a[action="previous"]', function waitForPrevious() {
         casper.echo("Moving to previous transactions", "INFO")
-        casper.waitForSelector('input#pnlgrpStatement\\:conS1\\:frmVSPUpper\\:btnViewPreviousStatement', scrapeLoop);
+        // casper.wait(1000);
+        casper.waitForSelectorTextChange('#statementTable table tbody tr:nth-child(1) td:nth-child(6)', scrapeLoop, 
+            function gotoPreviousTimeout() {
+                this.capture("previous-error.png");
+                this.debugHTML();
+                this.die("Go to previous timeout. Screenshot saved to previous-error.png.", 2);
+            }, 20000);
     });
 }
 
@@ -57,7 +68,7 @@ function scrapeThisPage() {
         var txnList = []; // transaction list for this page
 
         // parse all records out from this page into object
-        var rows = document.querySelectorAll('table#pnlgrpStatement\\:conS1\\:tblTransactionListView tbody tr');
+        var rows = document.querySelectorAll('table[class="table table-std"] tbody tr');
         // make sure we got something
         if (rows.length) {
             // for each row in table 
