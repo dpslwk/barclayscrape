@@ -80,7 +80,7 @@ function scrapeThisPage() {
                 // date (convert form 23 Feb 15 to 23/02/15 UK)
                 txd['date'] = new Date(row.childNodes[0].innerText);
                 // recombine description
-                txd['description'] = row.childNodes[1].innerText;
+                txd['description'] = row.childNodes[1].innerText.toUpperCase().replace(',', '');
                 // type
                 txd['type'] = row.childNodes[2].innerText;
                 // in amount
@@ -131,7 +131,7 @@ function writeCsv(transactions) {
         // casper.echo(txnDate);
         var dateString = zeroPad(txnDate.getDate(), 2) + '/' + zeroPad(txnDate.getMonth()+1, 2)  + '/' + txnDate.getFullYear();
         // casper.echo(dateString)
-        return  dateString + ',' + d['type'] + ",'" + sortCode + ',' + accountNumber + ',' + d['description'] + ' ,' + d['out'].replace(/[£,]/g, '')+ ',' + d['in'].replace(/[£,]/g, '')+ ',' + d['balance'].replace(/[£,]/g, '');
+        return  dateString + ',' + d['type'] + ",'" + sortCode + ',' + accountNumber + ',' + d['description'] + ',' + d['out'].replace(/[£,]/g, '')+ ',' + d['in'].replace(/[£,]/g, '')+ ',' + d['balance'].replace(/[£,]/g, '');
     });
 
     // prepend headers 
