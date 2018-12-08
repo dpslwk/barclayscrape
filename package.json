@@ -1,21 +1,22 @@
 {
-  "name": "barclayscrape",
+  "name": "tsbscrape",
   "version": "3.0.5",
-  "description": "Programmatically manipulate Barclays online banking",
-  "main": "barclayscrape.js",
+  "description": "Programmatically manipulate TSB online banking",
+  "main": "tsbscrape.js",
   "bin": {
-    "barclayscrape": "./barclayscrape.js"
+    "tsbscrape": "./tsbscrape.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/russss/barclayscrape.git"
+    "url": "git+https://github.com/dpslwk/barclayscrape.git"
   },
   "author": "Russ Garrett",
+  "contributors": "Matt Lloyd",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/russss/barclayscrape/issues"
+    "url": "https://github.com/dpslwk/barclayscrape/issues"
   },
-  "homepage": "https://github.com/russss/barclayscrape#readme",
+  "homepage": "https://github.com/dpslwk/barclayscrape#readme",
   "dependencies": {
     "commander": "^2.18.0",
     "configstore": "^4.0.0",

@@ -46,3 +46,28 @@ exports.wait = async (page, selector) => {
     throw `Couldn't find selector "${selector}" on page ${page.url()}. Screenshot saved to ${screenshotFile}.`;
   }
 };
+
+exports.selectOptionByValue = async (page, selector, valueToMatch) => {
+  try {
+    await page.evaluate(function(selector, valueToMatch){
+        var select = document.querySelector(selector),
+            found = false;
+        Array.prototype.forEach.call(select.children, function(opt, i){
+            if (!found && opt.value.indexOf(valueToMatch) !== -1) {
+                select.selectedIndex = i;
+                found = true;
+            }
+        });
+        // dispatch change event in case there is some kind of validation
+        var evt = document.createEvent("UIEvents"); // or "HTMLEvents"
+        evt.initUIEvent("change", true, true);
+        select.dispatchEvent(evt);
+    }, selector, valueToMatch)
+  } catch (err) {
+    raiseWarning(page);
+
+    const screenshotFile = './error.png';
+    await page.screenshot(screenshotFile);
+    throw `Couldn't find selector "${selector}" on page ${page.url()}. Screenshot saved to ${screenshotFile}.`;
+  }
+};

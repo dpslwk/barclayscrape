@@ -9,7 +9,7 @@ class Session {
     this.logged_in = false;
     //this.page.on('console', msg => console.log('PAGE LOG:', msg.text()));
     await this.page.setViewport({width: 1000, height: 1500});
-    await this.page.goto('https://bank.barclays.co.uk');
+    await this.page.goto('https://businessinternetbanking.tsb.co.uk/business/logon/login/#/login');
   }
 
   async close() {
@@ -18,76 +18,53 @@ class Session {
 
   async loginStage1(credentials) {
     // Stage 1 of login - enter surname and membership number.
-    await u.wait(this.page, '#membershipNum0');
+    await u.wait(this.page, '#userIdInput > input');
     await u.fillFields(this.page, {
-      '#surname0': credentials['surname'],
-      '#membershipNum0': credentials['membershipno'],
+      '#userIdInput > input': credentials['username'],
+      '#passwordInput > input': credentials['password'],
     });
-    await u.click(this.page, 'button[title="Next Step"]');
-  }
-
-  async loginSelectMethod(method) {
-    // Stage 2: If multiple auth methods are enabled for this account,
-    // select the correct one.
-    
-    // Wait for the login button which hopefully means the page has loaded.
-    await u.wait(this.page, 'button[title="Log in to Online Banking"]')
-    let selector = '[ng-controller="authTFACtrl"] ';
-    if (method == 'motp') {
-      selector += 'input#radio-c3';
-    } else if (method == 'otp') {
-      selector += 'input#radio-c4';
-    }
-
-    const sel = await this.page.$(selector);
-    if (sel) {
-      await this.page.$eval(selector, el => el.click())
-    }
+    await u.click(this.page, 'button[ng-click="submit(loginForm)"]');
+    console.log("Stage 1 login complete");
   }
 
   async ensureLoggedIn() {
     // Check that we're looking at the logged in homepage and throw an
     // error if we aren't.
-    await u.wait(this.page, '#module-account-summary');
+    await u.wait(this.page, 'button#lnkCustomerLogoff');
     this.logged_in = true;
   }
 
-  async loginOTP(credentials) {
-    // Log in using a one time password (PinSentry).
+  async loginMemInfo(credentials) {
+    // Log in using memorable info
     await this.loginStage1(credentials);
-    await this.loginSelectMethod('otp');
-    await u.wait(this.page, '#pinsentryCode0');
-    await u.fillFields(this.page, {
-      '#lastDigits0': credentials['card_digits'],
-      '#pinsentryCode0': credentials['otp'].slice(0, 4),
-      '#pinsentryCode1': credentials['otp'].slice(4, 8),
-    });
-    await u.click(this.page, 'button[title="Log in to Online Banking"]');
-    await this.ensureLoggedIn();
-  }
+    await u.wait(this.page, 'span[translate-values="{charZPos : chars.charZPos}"]');
+    const xText = await this.page.$eval('span[translate-values="{charXPos : chars.charXPos}"]', el => el.textContent);
+    const yText = await this.page.$eval('span[translate-values="{charYPos : chars.charYPos}"]', el => el.textContent);
+    const zText = await this.page.$eval('span[translate-values="{charZPos : chars.charZPos}"]', el => el.textContent);
+    const xInt = parseInt(xText.split(" ")[1][0])-1
+    const yInt = parseInt(yText.split(" ")[1][0])-1
+    const zInt = parseInt(zText.split(" ")[1][0])-1
 
-  async loginMOTP(credentials) {
-    // Log in using Mobile PinSentry.
-    await this.loginStage1(credentials);
-    await this.loginSelectMethod('motp');
-    await u.wait(this.page, '#mobilePinsentryCode0');
-    await u.fillFields(this.page, {
-      '#mobilePinsentryCode0': credentials['motp'].slice(0, 4),
-      '#mobilePinsentryCode1': credentials['motp'].slice(4, 8),
-    });
-    await u.click(this.page, 'button[title="Log in to Online Banking"]');
+    await u.selectOptionByValue(this.page, '#charXPos', credentials.memInfo.charAt(xInt));
+    await u.selectOptionByValue(this.page, '#charYPos', credentials.memInfo.charAt(yInt));
+    await u.selectOptionByValue(this.page, '#charZPos', credentials.memInfo.charAt(zInt));
+
+    await u.click(this.page, 'button[ng-click="submit(memorableInformationForm)"]');
     await this.ensureLoggedIn();
+    console.log("Stage 2 login complete");
   }
 
   async accounts() {
-    const accs = await this.page.$$('a#account-actions');
+    await u.wait(this.page, 'span:not(.text-lg)[ng-bind]')
+    const accs = await this.page.$$('span:not(.text-lg)[ng-bind]');
     let res = [];
     for (let a of accs) {
+      const number = await this.page.evaluate(el => el.innerText, a);
       res.push(
         new Account(
           this,
-          await u.getAttribute(this.page, a, 'data-productid'),
-          await u.getAttribute(this.page, a, 'data-productindex'),
+          number.split(', ')[0],
+          number.split(', ')[1]
         ),
       );
     }
@@ -95,8 +72,8 @@ class Session {
   }
 
   async home() {
-    await u.click(this.page, '#logo');
-    await u.wait(this.page, '.account-paging');
+    await u.click(this.page, 'a[ui-sref="holdingListBiz.holdingListBiz"]');
+    await u.wait(this.page, 'proteo-ui-account-summary');
   }
 }
 

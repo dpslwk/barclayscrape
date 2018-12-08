@@ -1,3 +1,9 @@
+TSBscrape v2.0
+==============
+Yet again I've completely hacked Russ's great work to to TSB businness accounts for Nottinghack
+
+
+
 Barclayscrape v3.0
 ==================
 Code to programmatically manipulate Barclays online banking using
