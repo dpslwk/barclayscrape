@@ -1,8 +1,39 @@
 TSBscrape v2.0
 ==============
-Yet again I've completely hacked Russ's great work to to TSB businness accounts for Nottinghack
+Yet again I've completely hacked Russ's great work to use with TSB businness accounts for Nottinghack
 
 
+Usage: tsbscrape 
+----------------
+```
+Options:
+
+  -V, --version       output the version number
+  --no-headless       Show browser window when interacting
+  -h, --help          output usage information
+
+Commands:
+
+  list                List all available accounts
+  get_csv <out_path>  Fetch .csv files for all accounts into out_path
+  config              Set up login details
+```
+
+Usage: hmsupload
+-----------------
+```
+Options:
+
+  -V, --version         output the version number
+  --no-headless         Show browser window when interacting
+  -h, --help            output usage information
+
+Commands:
+
+  audit                 Trigger a members audit
+  upload_csv <in_path>  Upload latest .csv file from in_path
+  config                Set up login details
+```
 
 Barclayscrape v3.0
 ==================
