@@ -4,7 +4,8 @@
   "description": "Programmatically manipulate TSB online banking",
   "main": "tsbscrape.js",
   "bin": {
-    "tsbscrape": "./tsbscrape.js"
+    "tsbscrape": "./tsbscrape.js",
+    "hmsupload": "./hmsupload.js"
   },
   "repository": {
     "type": "git",
