@@ -19,9 +19,9 @@
   },
   "homepage": "https://github.com/dpslwk/barclayscrape#readme",
   "dependencies": {
-    "commander": "^2.18.0",
+    "commander": "^2.19.0",
     "configstore": "^4.0.0",
-    "puppeteer": "^1.10.0",
+    "puppeteer": "^1.18.1",
     "syncprompt": "^2.0.0"
   },
   "engines": {

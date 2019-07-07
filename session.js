@@ -20,8 +20,10 @@ class Session {
     // Stage 1 of login - enter surname and membership number.
     await u.wait(this.page, '#userIdInput > input');
     await u.fillFields(this.page, {
-      '#userIdInput > input': credentials['username'],
       '#passwordInput > input': credentials['password'],
+    });
+    await u.fillFields(this.page, {
+      '#userIdInput > input': credentials['username'],
     });
     await u.click(this.page, 'button[ng-click="submit(loginForm)"]');
     console.log("Stage 1 login complete");

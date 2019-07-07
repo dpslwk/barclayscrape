@@ -43,6 +43,7 @@ program
 program
   .command('get_csv <out_path>')
   .description('Fetch .csv files for all accounts into out_path')
+  .option('-m, --match', 'Include Transfer Account matches in csv output.')
   .action(async (out_path, options) => {
     var sess;
     try {
@@ -61,19 +62,28 @@ program
           var d = new Date();
           var fileDate = d.getFullYear().toString() + zeroPad(d.getMonth()+1, 2) + zeroPad(d.getDate(), 2) + '_' + zeroPad(d.getHours(), 2) + zeroPad(d.getMinutes(), 2);
           var filename = 'tsb_' + account.number + '_' + fileDate + '.csv';
-          
+
           // map trancasctions to csv
           var csvLines = transactions.map(function (d) {
               var txnDate = new Date(d['date']);
-              // casper.echo(txnDate);
               var dateString = zeroPad(txnDate.getDate(), 2) + '/' + zeroPad(txnDate.getMonth()+1, 2)  + '/' + txnDate.getFullYear();
-              // casper.echo(dateString)
-              return  dateString + ',' + d['type'] + ",'" + account.sortCode + ',' + account.number + ',' + d['description'] + ' ,' + d['out'].replace(/[£,]/g, '')+ ',' + d['in'].replace(/[£,]/g, '')+ ',' + d['balance'].replace(/[£,]/g, '');
+              var csvLine = dateString + ',' + d['type'] + ",'" + account.sortCode + ',' + account.number + ',' + d['description'] + ' ,' + d['out'].replace(/[£,]/g, '')+ ',' + d['in'].replace(/[£,]/g, '')+ ',' + d['balance'].replace(/[£,]/g, '');
+
+              if (options.match) {
+                var transferAccount = matchTransferAccount(d['description']);
+                csvLine += ',' + transferAccount;
+              }
+
+              return csvLine;
           });
 
-          // prepend headers 
+          // prepend headers
           // Transaction Date,Transaction Type,Sort Code,Account Number,Transaction Description,Debit Amount,Credit Amount,Balance,
-          csvLines.unshift("Transaction Date,Transaction Type,Sort Code,Account Number,Transaction Description,Debit Amount,Credit Amount,Balance,")
+          if (options.match) {
+            csvLines.unshift("Transaction Date,Transaction Type,Sort Code,Account Number,Transaction Description,Debit Amount,Credit Amount,Balance,Transfer Account,");
+          } else {
+            csvLines.unshift("Transaction Date,Transaction Type,Sort Code,Account Number,Transaction Description,Debit Amount,Credit Amount,Balance,");
+          }
 
           // write out object to csv file
           await fs_writeFile(path.join(out_path, filename), [].join.call(csvLines, '\n'));
@@ -96,7 +106,7 @@ program
     conf.set('password', password);
     var memInfo = prompt('Enter your memorible info: ');
     conf.set('memInfo', memInfo);
-    conf.set('tracking', new Date())
+    conf.set('tracking', new Date());
     console.log('\nTSBscrape is now configured.');
   });
 
@@ -136,4 +146,40 @@ async function auth() {
 function zeroPad(num, places) {
   var zero = places - num.toString().length + 1;
   return Array(+(zero > 0 && zero)).join("0") + num;
+}
+
+function matchTransferAccount(description) {
+  patterns = {
+    'PLEDGE': 'Income:Pledge Payments',
+    'HSNTSBLOAN': 'Liabilities:Membership Loan Payable',
+    'HSNTSB': 'Income:Membership Payments',
+    'TALKTALK': 'Expenses:Utilities:Internet',
+    'SERVICE CHARGES': 'Expenses:Bank Service Charge',
+    'PREMIUM CREDIT': 'Expenses:Insurance',
+    'EASY CLEAN': 'Expenses:Cleaning',
+    'TAURUS ACCOUNTING': 'Expenses:Professional Fees:Accounting',
+    'REDWOOD LEGAL': 'Expenses:Professional Fees:Legal Fees',
+    'CONFETTI NEW': 'Expenses:Teams:Trustees Misc',
+    'BOC MANCHESTER': 'Expenses:BOC Gas',
+    'NOTTM CITY COUNC': 'Expenses:Utilities:Council Tax',
+    'PLANER INDUCTIONS': 'Income:Inductions:Planer Thicknesser',
+    'BIZSPACE REFERENCE': 'Expenses:Bizspace Rent',
+    'NOTTINGHAM CLIFTON': 'Assets:Current Assets:Petty Cash',
+    'HMRC - ACCOUNTS': 'Expenses:Member Loan Repayments:Tax on Intrest',
+    'DEPOSIT OF CASH': 'Assets:Current Assets:Petty Cash',
+    'FAIR': 'Assets:Current Assets:FairFX',
+    'WATER PLUS': 'Expenses:Utilities:Water',
+    'EVENTBRITE INC': 'Income:Workshops:Eventbright',
+    'SNACKSPACE': 'Income:Snackspace',
+    'GREEN FESTIVAL': 'Expenses:Teams:Events',
+  };
+
+  for (var pattern in patterns) {
+    match = description.match(new RegExp(pattern));
+    if (match !== null) {
+      return patterns[pattern];
+    }
+  }
+
+  return "Imbalance-GBP";
 }
