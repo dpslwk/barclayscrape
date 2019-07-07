@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/dpslwk/barclayscrape#readme",
   "dependencies": {
+    "axios": "^0.19.0",
+    "axios-oauth-client": "^1.1.1",
+    "axios-token-interceptor": "^0.1.0",
     "commander": "^2.19.0",
     "configstore": "^4.0.0",
     "puppeteer": "^1.18.1",

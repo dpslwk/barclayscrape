@@ -7,6 +7,9 @@ const fs_writeFile = util.promisify(fs.writeFile);
 const program = require('commander');
 const Configstore = require('configstore');
 const prompt = require('syncprompt');
+const axios = require('axios');
+const oauth = require('axios-oauth-client');
+const tokenProvider = require('axios-token-interceptor');
 
 const pkg = require('./package.json');
 const session = require('./session.js');
@@ -41,6 +44,121 @@ program
   });
 
 program
+  .command('hms2_upload')
+  .description('Fetch latest transactions and upload to hms2')
+  .option('-b, --bypassssl', 'Bypass ssl checks.')
+  .action(async (options) => {
+    if (options.bypassssl) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    }
+
+    if (!(conf.has('hms2clientId') && conf.has('hms2clientSecret') && conf.has('hms2url'))) {
+      console.error(
+        'TSBscrape has not been configured for HMS 2 upload. Please run `tsbscrape config_hms2`',
+      );
+      program.help();
+    }
+
+    // setup oauth and axios
+    const getOwnerCredentials = oauth.client(axios.create(), {
+      url: conf.get('hms2url') + 'oauth/token',
+      grant_type: 'client_credentials',
+      client_id: conf.get('hms2clientId'),
+      client_secret: conf.get('hms2clientSecret'),
+    });
+
+    const instance = axios.create();
+    instance.interceptors.request.use(
+      // Wraps axios-token-interceptor with oauth-specific configuration,
+      // fetches the token using the desired claim method, and caches
+      // until the token expires
+      oauth.interceptor(tokenProvider, getOwnerCredentials)
+    );
+
+    var sess;
+    try {
+      sess = await auth();
+    } catch (err) {
+      console.error(err);
+      return;
+    }
+
+    try {
+      const accounts = await sess.accounts();
+      for (let account of accounts) {
+        const transactions = await account.statementCSV(conf);
+        if (transactions) {
+          // console.log(transactions[0]);
+          /*
+           * example JSON for request
+           * [
+           *     {
+           *         "sortCode" : "77-22-24",
+           *         "accountNumber" : "13007568",
+           *         "date" : "2017-07-17",
+           *         "description" : "Edward Murphy HSNTSBBPRK86CWPV 4",
+           *         "amount" : 500
+           *     },
+           *     {
+           *         "sortCode" : "77-22-24",
+           *         "accountNumber" : "13007568",
+           *         "date" : "2017-07-16",
+           *         "description" : "Gordon Johnson HSNTSB27496WPB2M 53",
+           *         "amount" : 700
+           *     },
+           *     {
+           *         "sortCode" : "77-22-24",
+           *         "accountNumber" : "13007568",
+           *         "date" : "2017-07-16",
+           *         "description" : "BIZSPACE",
+           *         "amount" : -238963
+           *     }
+           * ]
+           */
+          let mappedTransactions = transactions.map(function (t) {
+            let txnDate = new Date(t['date']);
+            let dateString = txnDate.getFullYear() + '-' + zeroPad(txnDate.getMonth()+1, 2) + '-' + zeroPad(txnDate.getDate(), 2);
+            var amount;
+            if (t['in']) {
+              amount = parseInt(t['in'].replace(/[£,.]/g, ''));
+            } else {
+              amount = -parseInt(t['out'].replace(/[£,.]/g, ''));
+            }
+
+            let transaction = {
+              "sortCode" : account.sortCode,
+              "accountNumber" : account.number,
+              "date" : dateString,
+              "description" : t['description'],
+              "amount" : amount
+            };
+
+            return transaction;
+          });
+
+          // transactions haver been mapped, now to pass onto hms2
+          console.log('Transactions mapped');
+          // console.log(mappedTransactions);
+
+          console.log('Uploading to HMS 2');
+          instance.post(conf.get('hms2url') + 'api/bank_transactions/upload', mappedTransactions)
+          .then(function (response) {
+            console.log('Transactions Uploaded');
+            // console.log(response);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      await sess.close();
+    }
+  });
+
+program
   .command('get_csv <out_path>')
   .description('Fetch .csv files for all accounts into out_path')
   .option('-m, --match', 'Include Transfer Account matches in csv output.')
@@ -59,18 +177,18 @@ program
         const transactions = await account.statementCSV(conf);
         if (transactions) {
           // console.log(transactions[0]);
-          var d = new Date();
-          var fileDate = d.getFullYear().toString() + zeroPad(d.getMonth()+1, 2) + zeroPad(d.getDate(), 2) + '_' + zeroPad(d.getHours(), 2) + zeroPad(d.getMinutes(), 2);
-          var filename = 'tsb_' + account.number + '_' + fileDate + '.csv';
+          let d = new Date();
+          let fileDate = d.getFullYear().toString() + zeroPad(d.getMonth()+1, 2) + zeroPad(d.getDate(), 2) + '_' + zeroPad(d.getHours(), 2) + zeroPad(d.getMinutes(), 2);
+          let filename = 'tsb_' + account.number + '_' + fileDate + '.csv';
 
           // map trancasctions to csv
           var csvLines = transactions.map(function (d) {
-              var txnDate = new Date(d['date']);
-              var dateString = zeroPad(txnDate.getDate(), 2) + '/' + zeroPad(txnDate.getMonth()+1, 2)  + '/' + txnDate.getFullYear();
+              let txnDate = new Date(d['date']);
+              let dateString = zeroPad(txnDate.getDate(), 2) + '/' + zeroPad(txnDate.getMonth()+1, 2)  + '/' + txnDate.getFullYear();
               var csvLine = dateString + ',' + d['type'] + ",'" + account.sortCode + ',' + account.number + ',' + d['description'] + ' ,' + d['out'].replace(/[£,]/g, '')+ ',' + d['in'].replace(/[£,]/g, '')+ ',' + d['balance'].replace(/[£,]/g, '');
 
               if (options.match) {
-                var transferAccount = matchTransferAccount(d['description']);
+                let transferAccount = matchTransferAccount(d['description']);
                 csvLine += ',' + transferAccount;
               }
 
@@ -108,6 +226,22 @@ program
     conf.set('memInfo', memInfo);
     conf.set('tracking', new Date());
     console.log('\nTSBscrape is now configured.');
+  });
+
+program
+  .command('config_hms2')
+  .description('Set up HMS 2 OAuth details')
+  .action(options => {
+    var hms2clientId = prompt('Enter HMS 2 client ID: ');
+    conf.set('hms2clientId', hms2clientId);
+    var hms2clientSecret = prompt('Enter HMS 2 client secrete: ');
+    conf.set('hms2clientSecret', hms2clientSecret);
+    var hsm2url = prompt('Enter the HMS2 URL (inc http[s]://): ');
+    if (hsm2url.charAt(hsm2url.length -1 ) != '/') {
+      hms2url += '/';
+    }
+    conf.set('hms2url', hsm2url);
+    console.log('\nHMS2 is now configured.');
   });
 
 program.parse(process.argv);
