@@ -235,11 +235,11 @@ program
     conf.set('hms2clientId', hms2clientId);
     var hms2clientSecret = prompt('Enter HMS 2 client secrete: ');
     conf.set('hms2clientSecret', hms2clientSecret);
-    var hsm2url = prompt('Enter the HMS2 URL (inc http[s]://): ');
-    if (hsm2url.charAt(hsm2url.length -1 ) != '/') {
+    var hms2url = prompt('Enter the HMS2 URL (inc http[s]://): ');
+    if (hms2url.charAt(hms2url.length -1 ) != '/') {
       hms2url += '/';
     }
-    conf.set('hms2url', hsm2url);
+    conf.set('hms2url', hms2url);
     console.log('\nHMS2 is now configured.');
   });
 
