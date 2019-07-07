@@ -116,8 +116,7 @@ program
            * ]
            */
           let mappedTransactions = transactions.map(function (t) {
-            let txnDate = new Date(t['date']);
-            let dateString = txnDate.getFullYear() + '-' + zeroPad(txnDate.getMonth()+1, 2) + '-' + zeroPad(txnDate.getDate(), 2);
+            let txnDate = new Date(t['date'] + ' UTC');
             var amount;
             if (t['in']) {
               amount = parseInt(t['in'].replace(/[£,.]/g, ''));
@@ -128,7 +127,7 @@ program
             let transaction = {
               "sortCode" : account.sortCode,
               "accountNumber" : account.number,
-              "date" : dateString,
+              "date" : txnDate.toJSON(),
               "description" : t['description'],
               "amount" : amount
             };
