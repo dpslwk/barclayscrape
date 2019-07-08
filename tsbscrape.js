@@ -74,6 +74,7 @@ program
       // until the token expires
       oauth.interceptor(tokenProvider, getOwnerCredentials)
     );
+    instance.defaults.headers.common['Accept'] = 'application/json';
 
     var sess;
     try {
@@ -140,7 +141,7 @@ program
           // console.log(mappedTransactions);
 
           console.log('Uploading to HMS 2');
-          instance.post(conf.get('hms2url') + 'api/bank_transactions/upload', mappedTransactions)
+          instance.post(conf.get('hms2url') + 'api/bank-transactions/upload', mappedTransactions)
           .then(function (response) {
             console.log('Transactions Uploaded');
             // console.log(response);
