@@ -28,7 +28,7 @@ class Session {
       '#userIdInput > input': credentials['username'],
       '#passwordInput > input': credentials['password'],
     });
-    await u.click(this.page, 'button[ng-click="submit(loginForm)"]');
+    await u.click(this.page, 'button[type="submit"]');
     console.log("Stage 1 login complete");
   }
 
