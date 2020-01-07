@@ -10,6 +10,8 @@ const prompt = require('syncprompt');
 const axios = require('axios');
 const oauth = require('axios-oauth-client');
 const tokenProvider = require('axios-token-interceptor');
+let {PythonShell} = require('python-shell')
+
 
 const pkg = require('./package.json');
 const session = require('./session.js');
@@ -47,6 +49,7 @@ program
   .command('hms2_upload')
   .description('Fetch latest transactions and upload to hms2')
   .option('-b, --bypassssl', 'Bypass ssl checks.')
+  .option('-g, --gnucash', 'Also import records into GnuCash')
   .action(async (options) => {
     if (options.bypassssl) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -135,6 +138,7 @@ program
 
             return transaction;
           });
+          // console.log(mappedTransactions[0]);
 
           // transactions haver been mapped, now to pass onto hms2
           console.log('Transactions mapped');
@@ -149,6 +153,11 @@ program
           .catch(function (error) {
             console.log(error);
           });
+
+          // import to gnucash
+          if (options.gnucash) {
+            await gunCashImport(transactions);
+          }
         }
       }
     } catch (err) {
@@ -181,7 +190,7 @@ program
           let fileDate = d.getFullYear().toString() + zeroPad(d.getMonth()+1, 2) + zeroPad(d.getDate(), 2) + '_' + zeroPad(d.getHours(), 2) + zeroPad(d.getMinutes(), 2);
           let filename = 'tsb_' + account.number + '_' + fileDate + '.csv';
 
-          // map trancasctions to csv
+          // map transactions to csv
           var csvLines = transactions.map(function (d) {
               let txnDate = new Date(d['date']);
               let dateString = zeroPad(txnDate.getDate(), 2) + '/' + zeroPad(txnDate.getMonth()+1, 2)  + '/' + txnDate.getFullYear();
@@ -222,7 +231,7 @@ program
     conf.set('username', username);
     var password = prompt('Enter your password: ');
     conf.set('password', password);
-    var memInfo = prompt('Enter your memorible info: ');
+    var memInfo = prompt('Enter your memorable info: ');
     conf.set('memInfo', memInfo);
     conf.set('tracking', new Date());
     console.log('\nTSBscrape is now configured.');
@@ -242,6 +251,15 @@ program
     }
     conf.set('hms2url', hms2url);
     console.log('\nHMS2 is now configured.');
+  });
+
+program
+  .command('config_gnucash')
+  .description('Set up gnucash-imports')
+  .action(options => {
+    var gnuCashImport = prompt('Enter full path for tsb-import.py: ');
+    conf.set('gnuCashImport', gnuCashImport);
+    console.log('\ngnucash-imports is now configured.');
   });
 
 program.parse(process.argv);
@@ -296,7 +314,7 @@ function matchTransferAccount(description) {
     'CONFETTI NEW': 'Expenses:Teams:Trustees Misc',
     'BOC MANCHESTER': 'Expenses:BOC Gas',
     'NOTTM CITY COUNC': 'Expenses:Utilities:Council Tax',
-    'PLANER INDUCTIONS': 'Income:Inductions:Planer Thicknesser',
+    'PLANER INDUCTION': 'Income:Inductions:Planer Thicknesser',
     'BIZSPACE REFERENCE': 'Expenses:Bizspace Rent',
     'NOTTINGHAM CLIFTON': 'Assets:Current Assets:Petty Cash',
     'HMRC - ACCOUNTS': 'Expenses:Member Loan Repayments:Tax on Intrest',
@@ -305,7 +323,11 @@ function matchTransferAccount(description) {
     'WATER PLUS': 'Expenses:Utilities:Water',
     'EVENTBRITE INC': 'Income:Workshops:Eventbright',
     'SNACKSPACE': 'Income:Snackspace',
+    'SNACK-EX': 'Income:Snackspace',
     'GREEN FESTIVAL': 'Expenses:Teams:Events',
+    'VIRGIN MEDIA PYMT': 'Expenses:Utilities:Internet',
+    'SUMUP PAYMENTS': 'Assets:Current Assets:SumUp',
+    'STRIPE PAYMENTS': 'Assets:Current Assets:Stripe'
   };
 
   for (var pattern in patterns) {
@@ -316,4 +338,67 @@ function matchTransferAccount(description) {
   }
 
   return "Imbalance-GBP";
+}
+
+async function gunCashImport(transactions) {
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  console.log('Importing to GnuCash')
+
+  if (!conf.has('gnuCashImport')) {
+    console.error(
+      'TSBscrape has not been configured for GnuCash import. Please run `tsbscrape config_gnucash`',
+    );
+    program.help();
+  }
+
+  let gnucashMappedTransactions = transactions.map(function (t) {
+    let txnDate = new Date(t['date'] + ' UTC');
+    var amount;
+    if (t['in']) {
+      amount = parseInt(t['in'].replace(/[£,.]/g, ''));
+    } else {
+      amount = -parseInt(t['out'].replace(/[£,.]/g, ''));
+    }
+
+    let transaction = {
+      "date" : txnDate.toJSON(),
+      "description" : t['description'],
+      "in": parseInt(t['in'].replace(/[£,.]/g, '')),
+      "out": parseInt(t['out'].replace(/[£,.]/g, '')),
+      "amount": amount,
+      "transferAccount": matchTransferAccount(t['description'])
+    };
+
+    return transaction;
+  });
+  // console.log(gnucashMappedTransactions);
+
+  let options = {
+    mode: 'json',
+    pythonOptions: ['-u'] // get print results in real-time
+  };
+
+  let gnuCashImport = new PythonShell(conf.get('gnuCashImport'), options);
+
+  gnuCashImport.on('message', function (message) {
+    // received a message sent from the Python script (a simple "print" statement)
+    console.log('[GnuCash Import] ' + message);
+  });
+
+  gnuCashImport.on('stderr', (stderr) => {
+    console.error('[GnuCash Import] ' + stderr);
+  });
+
+  for (let transaction of gnucashMappedTransactions) {
+    gnuCashImport.send(transaction);
+  }
+
+  gnuCashImport.end(function (err,code,signal) {
+    if (err) throw err;
+    console.log('[GnuCash Import] The exit code was: ' + code);
+    console.log('[GnuCash Import] The exit signal was: ' + signal);
+  });
 }

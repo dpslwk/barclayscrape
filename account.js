@@ -53,7 +53,7 @@ module.exports = class Account {
       return pageTransactions;
     } else {
       // click previous page button
-      console.log("Loading pxrevious transaction page");
+      console.log("Loading previous transaction page");
 
       await this.page.evaluate(async function clickPrevious() {
         function sleep(ms) {
@@ -84,7 +84,7 @@ module.exports = class Account {
       var rows = document.querySelectorAll('table[class="table table-std"] tbody tr');
       // make sure we got something
       if (rows.length) {
-        // for each row in table 
+        // for each row in table
         [].forEach.call(rows, function (row) {
           var txd; // blank to hold transaction data for this row
           txd = {}; // make it a dict
@@ -100,13 +100,13 @@ module.exports = class Account {
           txd['in'] = row.childNodes[3].innerText.trim();
           // out amount
           txd['out'] = row.childNodes[4].innerText.trim();
-          // blance
+          // balance
           txd['balance'] = row.childNodes[5].innerText.trim();
         });
       }
       // console.log(txnList)
-      return txnList;                
-    }); 
+      return txnList;
+    });
     // Back out the page now
     // join the transaction form this page onto the rest
     pageTransactions = pageTransactions.concat(res);

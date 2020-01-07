@@ -3,20 +3,30 @@ TSBscrape v2.0
 Yet again I've completely hacked Russ's great work to use with TSB businness accounts for Nottinghack
 
 
-Usage: tsbscrape 
+Usage: tsbscrape
 ----------------
 ```
 Options:
-
-  -V, --version       output the version number
-  --no-headless       Show browser window when interacting
-  -h, --help          output usage information
+  -V, --version                 output the version number
+  --no-headless                 Show browser window when interacting
+  -h, --help                    output usage information
 
 Commands:
+  list                          List all available accounts
+  hms2_upload [options]         Fetch latest transactions and upload to hms2
+  get_csv [options] <out_path>  Fetch .csv files for all accounts into out_path
+  config                        Set up login details
+  config_hms2                   Set up HMS 2 OAuth details
+  config_gnucash                Set up gnucash-imports
 
-  list                List all available accounts
-  get_csv <out_path>  Fetch .csv files for all accounts into out_path
-  config              Set up login details
+Usage: hms2_upload [options]
+
+Fetch latest transactions and upload to hms2
+
+Options:
+  -b, --bypassssl  Bypass ssl checks.
+  -g, --gnucash    Also import records into GnuCash
+  -h, --help       output usage information
 ```
 
 Usage: hmsupload
@@ -34,6 +44,7 @@ Commands:
   upload_csv <in_path>  Upload latest .csv file from in_path
   config                Set up login details
 ```
+
 
 Barclayscrape v3.0
 ==================
