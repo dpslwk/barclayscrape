@@ -317,7 +317,7 @@ function matchTransferAccount(description) {
     'PLANER INDUCTION': 'Income:Inductions:Planer Thicknesser',
     'BIZSPACE REFERENCE': 'Expenses:Bizspace Rent',
     'NOTTINGHAM CLIFTON': 'Assets:Current Assets:Petty Cash',
-    'HMRC - ACCOUNTS': 'Expenses:Member Loan Repayments:Tax on Intrest',
+    'HMRC - ACCOUNTS': 'Expenses:Member Loan Repayments:Tax on Interest',
     'DEPOSIT OF CASH': 'Assets:Current Assets:Petty Cash',
     'FAIR': 'Assets:Current Assets:FairFX',
     'WATER PLUS': 'Expenses:Utilities:Water',
