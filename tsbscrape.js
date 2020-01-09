@@ -145,7 +145,7 @@ program
           // console.log(mappedTransactions);
 
           console.log('Uploading to HMS 2');
-          instance.post(conf.get('hms2url') + 'api/bank-transactions/upload', mappedTransactions)
+          instance.post(conf.get('hms2url') + 'api/cc/bank-transactions/upload', mappedTransactions)
           .then(function (response) {
             console.log('Transactions Uploaded');
             // console.log(response);
