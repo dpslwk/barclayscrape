@@ -315,7 +315,7 @@ function matchTransferAccount(description) {
     'BOC MANCHESTER': 'Expenses:BOC Gas',
     'NOTTM CITY COUNC': 'Expenses:Utilities:Council Tax',
     'PLANER INDUCTION': 'Income:Inductions:Planer Thicknesser',
-    'BIZSPACE REFERENCE': 'Expenses:Bizspace Rent',
+    'BIZSPACE REFERENCE': 'Expenses:Bizspace Rent:F6',
     'NOTTINGHAM CLIFTON': 'Assets:Current Assets:Petty Cash',
     'HMRC - ACCOUNTS': 'Expenses:Member Loan Repayments:Tax on Interest',
     'DEPOSIT OF CASH': 'Assets:Current Assets:Petty Cash',
