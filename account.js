@@ -30,6 +30,7 @@ module.exports = class Account {
       conf.set(this.number+'tracking', this.tracking);
     }
     this.lastDate = this.tracking.setHours(-24);
+    console.log("Going back to: " + this.tracking)
     this.pageCount = 0;
     await this.page.waitForNavigation({waitUntil: 'networkidle0'})
 
