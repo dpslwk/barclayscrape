@@ -309,6 +309,7 @@ function matchTransferAccount(description) {
     'SERVICE CHARGES': 'Expenses:Bank Service Charge',
     'PREMIUM CREDIT': 'Expenses:Insurance',
     'EASY CLEAN': 'Expenses:Cleaning',
+    'GCCFM REFERENCE': 'Expenses:Cleaning',
     'TAURUS ACCOUNTING': 'Expenses:Professional Fees:Accounting',
     'REDWOOD LEGAL': 'Expenses:Professional Fees:Legal Fees',
     'CONFETTI NEW': 'Expenses:Teams:Trustees Misc',
@@ -317,6 +318,7 @@ function matchTransferAccount(description) {
     'PLANER INDUCTION': 'Income:Inductions:Planer Thicknesser',
     'BIZSPACE REFERENCE': 'Expenses:Bizspace Rent:F6',
     'NOTTINGHAM CLIFTON': 'Assets:Current Assets:Petty Cash',
+    '5\d{5}': 'Assets:Current Assets:Petty Cash',
     'HMRC - ACCOUNTS': 'Expenses:Member Loan Repayments:Tax on Interest',
     'DEPOSIT OF CASH': 'Assets:Current Assets:Petty Cash',
     'FAIR': 'Assets:Current Assets:FairFX',
@@ -327,7 +329,8 @@ function matchTransferAccount(description) {
     'GREEN FESTIVAL': 'Expenses:Teams:Events',
     'VIRGIN MEDIA PYMT': 'Expenses:Utilities:Internet',
     'SUMUP PAYMENTS': 'Assets:Current Assets:SumUp',
-    'STRIPE PAYMENTS': 'Assets:Current Assets:Stripe'
+    'STRIPE PAYMENTS': 'Assets:Current Assets:Stripe',
+    'TV LICENCE': 'Expenses:Teams:Trustees Misc'
   };
 
   for (var pattern in patterns) {
