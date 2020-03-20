@@ -26,7 +26,6 @@ class Session {
     await sleep(500);
     await u.fillFields(this.page, {
       '#userIdInput > input': credentials['username'],
-      '#passwordInput > input': credentials['password'],
     });
     await u.click(this.page, 'button[type="submit"]');
     console.log("Stage 1 login complete");
@@ -43,6 +42,11 @@ class Session {
     // Log in using memorable info
     await this.loginStage1(credentials);
     await u.wait(this.page, 'span[translate-values="{charZPos : chars.charZPos}"]');
+
+    await u.fillFields(this.page, {
+      '#passwordInput > input': credentials['password'],
+    });
+
     const xText = await this.page.$eval('span[translate-values="{charXPos : chars.charXPos}"]', el => el.textContent);
     const yText = await this.page.$eval('span[translate-values="{charYPos : chars.charYPos}"]', el => el.textContent);
     const zText = await this.page.$eval('span[translate-values="{charZPos : chars.charZPos}"]', el => el.textContent);
