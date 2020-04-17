@@ -330,7 +330,8 @@ function matchTransferAccount(description) {
     'VIRGIN MEDIA PYMT': 'Expenses:Utilities:Internet',
     'SUMUP PAYMENTS': 'Assets:Current Assets:SumUp',
     'STRIPE PAYMENTS': 'Assets:Current Assets:Stripe',
-    'TV LICENCE': 'Expenses:Teams:Trustees Misc'
+    'TV LICENCE': 'Expenses:Teams:Trustees Misc',
+    'ADYEN N.V. REFERENCE': 'Income:Donations:GoFundMe PPE'
   };
 
   for (var pattern in patterns) {
