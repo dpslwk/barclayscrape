@@ -331,7 +331,8 @@ function matchTransferAccount(description) {
     'SUMUP PAYMENTS': 'Assets:Current Assets:SumUp',
     'STRIPE PAYMENTS': 'Assets:Current Assets:Stripe',
     'TV LICENCE': 'Expenses:Teams:Trustees Misc',
-    'ADYEN N.V. REFERENCE': 'Income:Donations:GoFundMe PPE'
+    'ADYEN N.V. REFERENCE': 'Income:Donations:GoFundMe PPE',
+    'HSNOTTSPPE': 'Expenses:Miscellaneous:GoFundMe PPE'
   };
 
   for (var pattern in patterns) {
