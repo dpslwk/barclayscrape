@@ -3,6 +3,7 @@ const util = require('util');
 const path = require('path');
 const fs = require('fs');
 const fs_writeFile = util.promisify(fs.writeFile);
+require('log-timestamp');
 
 const program = require('commander');
 const Configstore = require('configstore');
@@ -27,6 +28,7 @@ program
   .command('list')
   .description('List all available accounts')
   .action(async options => {
+    console.log('list');
     var sess;
     try {
       sess = await auth();
@@ -51,6 +53,7 @@ program
   .option('-b, --bypassssl', 'Bypass ssl checks.')
   .option('-g, --gnucash', 'Also import records into GnuCash')
   .action(async (options) => {
+    console.log('hms2_upload');
     if (options.bypassssl) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     }
@@ -172,6 +175,7 @@ program
   .description('Fetch .csv files for all accounts into out_path')
   .option('-m, --match', 'Include Transfer Account matches in csv output.')
   .action(async (out_path, options) => {
+    console.log('get_csv');
     var sess;
     try {
       sess = await auth();
