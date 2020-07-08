@@ -233,6 +233,8 @@ program
     conf.set('password', password);
     var memInfo = prompt('Enter your memorable info: ');
     conf.set('memInfo', memInfo);
+    var phoneType = prompt('Enter your phoneType to use for OTP SMS [home, mobile, work]: ');
+    conf.set('phoneType', phoneType);
     conf.set('tracking', new Date());
     console.log('\nTSBscrape is now configured.');
   });
@@ -262,6 +264,19 @@ program
     console.log('\ngnucash-imports is now configured.');
   });
 
+program
+  .command('config_mqtt')
+  .description('Set up MQTT details')
+  .action(options => {
+    var mqttHost = prompt('Enter the host: ');
+    conf.set('mqttHost', mqttHost);
+    var mqttPort = prompt('Enter the port: ');
+    conf.set('mqttPort', mqttPort);
+    var mqttTopic = prompt('Enter the topic: ');
+    conf.set('mqttTopic', mqttTopic);
+    console.log('\nmqtt is now configured.');
+  });
+
 program.parse(process.argv);
 
 async function auth() {
@@ -284,7 +299,13 @@ async function auth() {
     await sess.loginMemInfo({
       username: conf.get("username"),
       password: conf.get("password"),
-      memInfo: conf.get("memInfo")
+      memInfo: conf.get("memInfo"),
+      phoneType: conf.get("phoneType")
+    },
+    {
+      host: conf.get('mqttHost'),
+      port: conf.get('mqttPort'),
+      topic: conf.get('mqttTopic')
     });
   } catch (err) {
     try {
