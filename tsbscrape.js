@@ -342,6 +342,7 @@ function matchTransferAccount(description) {
     'NOTTM CITY COUNC': 'Expenses:Utilities:Council Tax',
     'PLANER INDUCTION': 'Income:Inductions:Planer Thicknesser',
     'BIZSPACE REFERENCE': 'Expenses:Bizspace Rent:F6',
+    'BIZSPACE LIMITED REFERENCE': 'Expenses:Bizspace Rent:F6',
     'NOTTINGHAM CLIFTON': 'Assets:Current Assets:Petty Cash',
     '5\d{5}': 'Assets:Current Assets:Petty Cash',
     'HMRC - ACCOUNTS': 'Expenses:Member Loan Repayments:Tax on Interest',

@@ -25,10 +25,10 @@ class Session {
     }
 
     // Stage 1 of login - enter username.
-    await u.wait(this.page, '#userIdInput > input');
+    await u.wait(this.page, '#credentialsPublicBiz > div:nth-child(2) > div > form > div.row.no-margin.section-lightblue > proteo-ui-form-group > div > ng-transclude > proteo-ui-form-control > div > ng-transclude > input');
     await sleep(500);
     await u.fillFields(this.page, {
-      '#userIdInput > input': credentials['username'],
+      '#credentialsPublicBiz > div:nth-child(2) > div > form > div.row.no-margin.section-lightblue > proteo-ui-form-group > div > ng-transclude > proteo-ui-form-control > div > ng-transclude > input': credentials['username'],
     });
     await u.click(this.page, 'button[type="submit"]');
     console.log("Stage username login complete");
@@ -100,7 +100,7 @@ class Session {
     await u.wait(this.page, 'span[translate-values="{charZPos : chars.charZPos}"]');
 
     await u.fillFields(this.page, {
-      '#passwordInput > input': credentials['password'],
+      '#credentialsPublicBiz > div.row.ng-scope > div.col-xs-12 > form > div:nth-child(1) > div > div > div > div > proteo-ui-form-group > div > ng-transclude > proteo-ui-form-control > div > ng-transclude > input': credentials['password'],
     });
 
     const xText = await this.page.$eval('span[translate-values="{charXPos : chars.charXPos}"]', el => el.textContent);
@@ -125,8 +125,8 @@ class Session {
   }
 
   async accounts() {
-    await u.wait(this.page, 'span:not(.text-lg)[ng-bind]')
-    const accs = await this.page.$$('span:not(.text-lg)[ng-bind]');
+    await u.wait(this.page, 'p.text-bold.text-std[ng-bind]')
+    const accs = await this.page.$$('p.text-bold.text-std[ng-bind]');
     let res = [];
     for (let a of accs) {
       const number = await this.page.evaluate(el => el.innerText, a);
@@ -163,7 +163,7 @@ class Session {
       // payload is Buffer
       // console.log(payload.toString());
       const sms = JSON.parse(payload.toString()) // payload is a buffer
-
+      // console.log(sms);
       // parse out the OTP
       const regex = /\d{6}/gm;
       const found = sms.text.match(regex);
