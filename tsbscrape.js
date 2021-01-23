@@ -335,6 +335,7 @@ function matchTransferAccount(description) {
     'PREMIUM CREDIT': 'Expenses:Insurance',
     'EASY CLEAN': 'Expenses:Cleaning',
     'GCCFM REFERENCE': 'Expenses:Cleaning',
+    'GCC FACILITIES MA REFERENCE': 'Expenses:Cleaning',
     'TAURUS ACCOUNTING': 'Expenses:Professional Fees:Accounting',
     'REDWOOD LEGAL': 'Expenses:Professional Fees:Legal Fees',
     'CONFETTI NEW': 'Expenses:Teams:Trustees Misc',
